@@ -47,7 +47,8 @@ class field:
    file = open(filePath, 'w')
    contents = ''
    for line in self.cons[1:]:
-    contents += (startTag+': ('+str(line.sx)+', '+str(line.sy)+') '+endTag+': ('+str(line.ex)+', '+str(line.ey)+')\n')
+    contents += startTag+': ('+str(line.sx)+', '+str(line.sy)+') '+endTag+': ('+str(line.ex)+', '+str(line.ey)+')\n'
+
    file.write(contents)
    file.close()
 #handler code for when the mouse clicked event occurs
