@@ -9,6 +9,9 @@ pygame.font.init()
 FPS = pygame.time.Clock()
 FPS.tick(30)
 DisplaySurf = pygame.display.set_mode((odim,odim))
+#these two are for what is saved in the algorithm.txt file
+startTag = "from"
+endTag = "to"
 #you can play with the color settings by chaning the paramas given to each
 #pygame.Color(red, green, blue)
 gridColor = pygame.Color(255,0,0)
@@ -37,7 +40,7 @@ class field:
    file = open(filePath, 'w')
    contents = ''
    for line in self.cons[1:]:
-    contents += ('start: ('+str(line.sx)+', '+str(line.sy)+') end: ('+str(line.ex)+', '+str(line.ey)+')\n')
+    contents += startTag+': ('+str(line.sx)+', '+str(line.sy)+') '+endTag+': ('+str(line.ex)+', '+str(line.ey)+')\n'
    file.write(contents)
    file.close()
  def mouseClicked(self):
