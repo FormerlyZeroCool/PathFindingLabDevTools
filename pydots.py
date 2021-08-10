@@ -1,7 +1,7 @@
 import sys
 import pygame 
 from pygame.locals import *
-odim = 300
+odim = 500
 offset = 100/2
 dim = (odim - offset*2)/3
 pygame.init()
@@ -15,6 +15,7 @@ gridColor = pygame.Color(255,0,0)
 dotColor = pygame.Color(5,205,175)
 laidLinesColor = pygame.Color(0,60,200)
 leaderLineColor = pygame.Color(155,0,150)
+backgroundColor = pygame.Color(0,50,0)
 class Line:
  sx = -1
  sy = -1
@@ -74,7 +75,7 @@ class field:
   
 f = field(pygame, DisplaySurf)
 while True:
- pygame.draw.rect(DisplaySurf, pygame.Color(0,50,0), (0,0,odim,odim))
+ pygame.draw.rect(DisplaySurf, backgroundColor, (0,0,odim,odim))
  f.draw()
  pygame.display.update()
  for event in pygame.event.get():
