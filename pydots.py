@@ -17,10 +17,6 @@ laidLinesColor = pygame.Color(0,60,200)
 leaderLineColor = pygame.Color(155,0,150)
 backgroundColor = pygame.Color(0,50,0)
 class Line:
- sx = -1
- sy = -1
- ex = -1
- ey = -1
  def __init__(self,sx,sy,ex,ey):
   self.sx = sx
   self.sy = sy
