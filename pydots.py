@@ -47,8 +47,7 @@ class field:
    file = open(filePath, 'w')
    contents = ''
    for line in self.cons[1:]:
-    contents += startTag+': ('+str(line.sx)+', '+str(line.sy)+') '+endTag+': ('+str(line.ex)+', '+str(line.ey)+')\n'
-
+    contents += (startTag+': ('+str(line.sx)+', '+str(line.sy)+') '+endTag+': ('+str(line.ex)+', '+str(line.ey)+')\n')
    file.write(contents)
    file.close()
 #handler code for when the mouse clicked event occurs
@@ -58,7 +57,8 @@ class field:
    for x in range(4):
     lastLine = self.cons[len(self.cons)-1]
     if self.pg.mouse.get_pos()[0] > (x*dim+offset-limit) and self.pg.mouse.get_pos()[0] < (x*dim+offset+limit) and self.pg.mouse.get_pos()[1] > y*dim+offset-limit and self.pg.mouse.get_pos()[1] < y*dim+offset+limit:
-     self.cons.append(Line(lastLine.ex, lastLine.ey, x, y))
+     if (lastLine.ex !=x or lastLine.ey != y):
+      self.cons.append(Line(lastLine.ex, lastLine.ey, x, y))
  def draw(self):
   #Draw grid, and labels
   for x in range(4):
