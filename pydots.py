@@ -16,7 +16,7 @@ pygame.init()
 pygame.font.init()
 FPS = pygame.time.Clock()
 #defines frames per second
-FPS.tick(30)
+FPS.tick(15)
 DisplaySurf = pygame.display.set_mode((odim,odim))
 #these two are for what is saved in the algorithm.txt file
 startTag = "from"
@@ -33,12 +33,16 @@ class Settings:
   self.surf = surf
   self.leaderOn = True
   self.showCoordinates = True
+  self.showGrid = True
+  self.showGridPoints = True
+  self.showGridLabels = True
   self.gridColor = pygame.Color(255,0,0)
   self.dotColor = pygame.Color(5,205,175)
   self.laidLinesColor = pygame.Color(0,60,200)
-  self.leaderLineColor = pygame.Color(195,0,190)
+  self.leaderLineColor = pygame.Color(125,125,150)
   self.backgroundColor = pygame.Color(255,255,255)
   self.buttonBackgroundColor = pygame.Color(55, 55, 55)
+  self.buttonSelectedBackgroundColor = pygame.Color(55, 55, 155)
   self.colors = [("Grid Color", self.gridColor),
   ("Grid Dot Color", self.dotColor),
   ("Laid Line Color", self.laidLinesColor),
@@ -47,18 +51,23 @@ class Settings:
   ("Button Background Color", self.buttonBackgroundColor) ]
   self.colors.clear()
   self.buttons = []
-  i = 0
+  i = 1
   deltaY = 20
   fontSize = 15
+  self.leaderButton = Button(self, self , pg, surf, "Show Leader Line", fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim - odim/5), deltaY)
+  i += 1
+  self.coordinatesButton = Button(self, self , pg, surf, "Show Current Coordinates", fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim - odim/5), deltaY)
+  i += 1
+  self.showGridButton = Button(self, self , pg, surf, "Show Grid Lines", fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim - odim/5), deltaY)
+  i += 1
+  self.showGridPointsButton = Button(self, self , pg, surf, "Show Grid Points", fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim - odim/5), deltaY)
+  i += 1
+  self.showGridLabelsButton = Button(self, self , pg, surf, "Show Grid Labels", fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim - odim/5), deltaY)
+  i += 1
+  self.menuButton = Button(self, self , pg, surf, "Back to Menu", fontSize, odim/10, odim - (deltaY+5), int(odim - odim/5), deltaY)
   for color in self.colors:
     self.buttons.append(Button(self, self , pg, surf, color[0], fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim/2)+dim, deltaY))
     i += 1
-  self.leaderButton = Button(self, self , pg, surf, "Show Leader Line", fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim/2)+dim, deltaY)
-  i += 1
-  self.coordinatesButton = Button(self, self , pg, surf, "Show Current Coordinates", fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim/2)+dim, deltaY)
-  i += 1
-  self.menuButton = Button(self, self , pg, surf, "Back to Menu", fontSize, odim/10, odim - (deltaY+5), int(odim/2)+dim, deltaY)
-  i += 1
 
  def eventHandler(self, event):
   if event.type == self.pg.MOUSEBUTTONUP:
@@ -70,16 +79,26 @@ class Settings:
     self.leaderOn = not self.leaderOn
   elif self.coordinatesButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
     self.showCoordinates = not self.showCoordinates
- def draw(self):
+  elif self.showGridButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
+   self.showGrid = not self.showGrid
+  elif self.showGridPointsButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
+   self.showGridPoints = not self.showGridPoints
+  elif self.showGridLabelsButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
+   self.showGridLabels = not self.showGridLabels
+ def drawButton(self, button, isSelected):
    color = self.buttonBackgroundColor
-   if self.leaderOn:
-     self.buttonBackgroundColor = pygame.Color(55, 55, 155)
-   self.leaderButton.draw()
+   if isSelected:
+     self.buttonBackgroundColor = self.buttonSelectedBackgroundColor
+   button.draw()
    self.buttonBackgroundColor = color
-   if self.showCoordinates:
-     self.buttonBackgroundColor = pygame.Color(55, 55, 155)
-   self.coordinatesButton.draw()
-   self.buttonBackgroundColor = color
+
+ def draw(self):
+   self.drawButton(self.leaderButton, self.leaderOn)
+   self.drawButton(self.coordinatesButton, self.showCoordinates)
+   self.drawButton(self.showGridLabelsButton, self.showGridLabels)
+   self.drawButton(self.showGridPointsButton, self.showGridPoints)
+   self.drawButton(self.showGridButton, self.showGrid)
+   color = self.buttonBackgroundColor
    self.buttonBackgroundColor = pygame.Color(55, 125, 55)
    self.menuButton.draw()
    self.buttonBackgroundColor = color
@@ -149,7 +168,7 @@ class Button:
     self.width = width
     self.height = height
     self.offset = height/10
-    self.font = pg.font.SysFont('Comic Sans MS', fontSize) 
+    self.font = pg.font.SysFont('Calibri', fontSize) 
   def draw(self):
     self.pg.draw.rect(self.surf, self.settings.buttonBackgroundColor, (self.x, self.y, self.width, self.height))
     x = self.x+self.offset
@@ -214,8 +233,8 @@ class Instructions:
   self.pg = pg
   self.surf = surf
   self.active = False
-  self.menuButton = Button(settings, self, pg, surf, "Menu", 18, odim-90, odim - 45, 45, 22)
-  self.font = pg.font.SysFont('Comic Sans MS', 25)  
+  self.menuButton = Button(settings, self, pg, surf, "Menu", 18, odim-90, odim - 45, 53, 35)
+  self.font = pg.font.SysFont('Calibri', 25)  
   self.text = ['1.) Press 0 to delete','all laid lines.','2.) Press 9 to delete','or undo last laid line.','3.) Click on a point','To place a line.','4.) Save/Load buttons','Save/Load to data.txt']
 #generic event handler mapper for class
  def eventHandler(self, event):
@@ -245,14 +264,14 @@ class field:
   width = 45
   offset = 80
   i = 0
-  self.menuButton = Button(settings, self, pg, surf, "Menu", 18, odim-(offset+(width+5)*i), odim - 30, width, 27)
+  self.menuButton = Button(settings, self, pg, surf, "Menu", 18, odim-(offset+(width+5)*i), odim - 30, width+5, 27)
   i += 1
   self.loadButton = Button(settings, self, pg, surf, "Load", 18, odim-(offset+(width+5)*i), odim - 30, width, 27)
   i += 1
   self.saveButton = Button(settings, self, pg, surf, "Save", 18, odim-(offset+(width+5)*i), odim - 30, width, 27)
   i += 1
   self.undoButton = Button(settings, self, pg, surf, "Undo", 18, odim-(offset+(width+5)*i), odim - 30, width, 27)
-  self.font = pg.font.SysFont('Comic Sans MS', 30)  
+  self.font = pg.font.SysFont('Calibri', 27)  
   self.cons.append(Line(0,0,0,0))
   self.pg = pg#pygame object
   self.surf = surf#pygame surface object
@@ -309,8 +328,8 @@ class field:
    if line:
     self.cons.append(line)
   
-  for x in range(15):
-   self.pg.draw.circle(self.surf, self.pg.Color(0,0,170), self.pg.mouse.get_pos(), int(x/2+2))
+  for x in range(30):
+   self.pg.draw.circle(self.surf, self.pg.Color(0,0,170), self.pg.mouse.get_pos(), int(x/4+2))
    pygame.display.update()
  def draw(self):
   if(self.active):
@@ -324,17 +343,21 @@ class field:
   self.undoButton.draw()
   self.settings.buttonBackgroundColor = color
   #Draw grid, and labels
-  for x in range(self.dim):
-   self.surf.blit(self.font.render(str(x), False, (0, 0, 0)), (x*dim+offset-10, 0))
-   self.surf.blit(self.font.render(str(x), False, (0, 0, 0)), (10, x*dim+offset-10))
-   self.pg.draw.line(self.surf, self.settings.gridColor,(offset+dim*x,offset), (offset+dim*x, (self.dim-1)*dim+offset))
-   self.pg.draw.line(self.surf, self.settings.gridColor,(offset,dim*x+offset),((self.dim-1)*dim+offset,offset+dim*x)) 
-  #Draw dots
-  for y in range(self.dim):
+  if self.settings.showGridLabels:
    for x in range(self.dim):
-    self.pg.draw.circle(self.surf, self.settings.dotColor, (int(dim*x+offset), int(dim*y+offset)), 10)
+    self.surf.blit(self.font.render(str(x), False, (0, 0, 0)), (x*dim+offset-10, 0))
+    self.surf.blit(self.font.render(str(x), False, (0, 0, 0)), (10, x*dim+offset-10))
+  if self.settings.showGrid:
+   for x in range(self.dim):
+    self.pg.draw.line(self.surf, self.settings.gridColor,(offset+dim*x,offset), (offset+dim*x, (self.dim-1)*dim+offset))
+    self.pg.draw.line(self.surf, self.settings.gridColor,(offset,dim*x+offset),((self.dim-1)*dim+offset,offset+dim*x)) 
+  #Draw dots
+  if self.settings.showGridPoints:
+   for y in range(self.dim):
+    for x in range(self.dim):
+     self.pg.draw.circle(self.surf, self.settings.dotColor, (int(dim*x+offset), int(dim*y+offset)), 10)
   #Draw lines placed
-  for line in self.cons:
+  for line in self.cons[1:]:
    self.pg.draw.line(self.surf, self.settings.laidLinesColor, (line.sx*dim+offset, line.sy*dim+offset), (line.ex*dim+offset,line.ey*dim+offset), 5)
   line = self.cons[len(self.cons)-1]
   #Draw line to cursor
