@@ -16,7 +16,7 @@ pygame.init()
 pygame.font.init()
 FPS = pygame.time.Clock()
 #defines frames per second
-FPS.tick(15)
+FPS.tick(25)
 DisplaySurf = pygame.display.set_mode((odim,odim))
 #these two are for what is saved in the algorithm.txt file
 startTag = "from"
