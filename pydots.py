@@ -178,10 +178,12 @@ class Button:
   def collision(self, point0, point1):
     return point0 >= self.x and point0 <= (self.x+self.width) and point1 >= self.y and point1 <= (self.y+self.height)
 
-
+#Class that handles a set of screens, nested menus can be written too
+#ie a Menu than handles other menus
 class Menu:
-  def __init__(self, pg, surf, settings, screens):
+  def __init__(self, pg, surf, settings, screens, menuText):
     self.active = False
+    self.menuText = menuText
     self.pg = pg
     self.surf = surf
     self.settings = settings
@@ -378,7 +380,7 @@ settings = Settings(pygame, DisplaySurf)
 f = field(pygame, DisplaySurf,gridDim, settings)
 dim = round((odim-offset)/f.dim)
 insPage = Instructions(pygame, DisplaySurf, settings)
-menu = Menu(pygame, DisplaySurf, settings, [f, insPage, settings])
+menu = Menu(pygame, DisplaySurf, settings, [f, insPage, settings], "Main Menu")
 while True:
 #Fill background with white each frame
  pygame.draw.rect(DisplaySurf, settings.backgroundColor, (0,0,odim,odim))
