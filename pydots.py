@@ -363,7 +363,7 @@ class field:
   self.menuText = "Drawing Grid"
   width = 45
   offset = 80
-  i = settings.odim/3
+  i = settings.odim/4
   self.menuButton = Button(settings, self, pg, surf, "Menu", 18, settings.odim-i, settings.odim -  30)
   i += self.menuButton.width + 10
   self.loadButton = Button(settings, self, pg, surf, "Load", 18, settings.odim-(i), settings.odim -  30)
@@ -426,7 +426,7 @@ class field:
   elif self.undoButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
     self.deleteLast()
   else:
-   line = self.calcPointCollision(15)
+   line = self.calcPointCollision(self.settings.unitDim/3)
    if line:
     self.cons.append(line)
   
@@ -480,7 +480,7 @@ class field:
 
 
 
-odim = 300
+odim = 650
 #init objects for pygame
 pygame.init()
 pygame.font.init()
