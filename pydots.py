@@ -426,7 +426,10 @@ class field:
   elif self.undoButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
     self.deleteLast()
   else:
-   line = self.calcPointCollision(self.settings.unitDim/3)
+   if self.settings.unitDim/3 < 7:
+    line = self.calcPointCollision(self.settings.unitDim/2)
+   else:
+    line = self.calcPointCollision(self.settings.unitDim/3)
    if line:
     self.cons.append(line)
   
