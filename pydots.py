@@ -26,6 +26,7 @@ endTag = "to"
 #settings class for all objects in runtime
 class Settings:
  def __init__(self, pg, surf):
+  self.parent = self
   self.menuText = "Settings"
   self.dataFile = "data.txt"
   self.active = False
@@ -75,6 +76,7 @@ class Settings:
  def mouseClicked(self, event):
   if self.menuButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
     self.active = False
+    self.parent.active = True
   elif self.leaderButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
     self.leaderOn = not self.leaderOn
   elif self.coordinatesButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
@@ -182,6 +184,7 @@ class Button:
 #ie a Menu than handles other menus
 class Menu:
   def __init__(self, pg, surf, settings, screens, menuText):
+    self.parent = self
     self.active = False
     self.menuText = menuText
     self.pg = pg
@@ -192,6 +195,7 @@ class Menu:
     self.title = (Button(settings, self , pg, surf, "Menu:", 25, dim, (35+2), int(odim/2)+dim, 35))
     i = 1
     for screen in self.screens:
+      screen.parent = self
       self.buttons.append(Button(settings, screen , pg, surf, screen.menuText, 25, dim, (35+2)*i+dim, int(odim/2)+dim, 35))
       i += 1
   def eventHandler(self, event):
@@ -199,9 +203,9 @@ class Menu:
       if event.type == self.pg.MOUSEBUTTONUP:
         self.mouseClicked(event)
     else:
-      for screen in self.screens:
-       if screen.active:
-         screen.eventHandler(event)
+      activeScreen = self.findActive()
+      if activeScreen:
+        activeScreen.eventHandler(event)
   def mouseClicked(self, event):
     if self.active:
       for button in self.buttons:
@@ -209,27 +213,44 @@ class Menu:
             self.active = False
             button.screenObj.active = True
     else:
-      for button in self.buttons:
-       if button.screenObj.active:
-        button.screenObj.mouseClicked(event)
+      if activeScreen:
+        activeScreen.mouseClicked(event)
+  def findActive(self):
+    if self.active:
+      return self
+    for screen in self.screens:
+      if isinstance(screen, Menu):
+        return screen.findActive()
+      elif screen.active:
+        return screen
+    return False
   def draw(self):
+    found = False
     if not(self.active):
-      found = False
       for screen in self.screens:
-        if screen.active:
+        if isinstance(screen, Menu):
+          if screen.active:
+            found = screen
+            screen.draw()
+          else:
+             found = screen.draw()
+        elif screen.active:
           found = screen
           screen.draw()
       self.active = not(found)
-    if self.active:
+    else:
+      found = self
       color = self.settings.buttonBackgroundColor
       self.settings.buttonBackgroundColor = self.pg.Color(105, 55, 55)
       self.title.draw()
       self.settings.buttonBackgroundColor = color
       for button in self.buttons:
         button.draw()
+    return found
 class Instructions:
 #setup memory for object
  def __init__(self, pg, surf, settings):
+  self.parent = self
   self.settings = settings
   self.menuText = "Instructions"
   self.pg = pg
@@ -246,6 +267,7 @@ class Instructions:
  def mouseClicked(self, event):
   if self.menuButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
     self.active = False
+    self.parent.active = True
  def draw(self):
   color = self.settings.buttonBackgroundColor
   self.settings.buttonBackgroundColor = pygame.Color(55, 125, 55)
@@ -260,6 +282,7 @@ class field:
  cons  = []
 #setup memory for object
  def __init__(self, pg, surf, dim, settings):
+  self.parent = self
   self.dim = dim
   self.settings = settings
   self.menuText = "Exit Menu"
@@ -277,7 +300,7 @@ class field:
   self.cons.append(Line(0,0,0,0))
   self.pg = pg#pygame object
   self.surf = surf#pygame surface object
-  self.active = True
+  self.active = False
 
  def eventHandler(self, event):
   if event.type == self.pg.MOUSEBUTTONUP:
@@ -319,6 +342,7 @@ class field:
  def mouseClicked(self, event):
   if self.menuButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
     self.active = False
+    self.parent.active = True
   elif self.loadButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
     self.loadFile()
   elif self.saveButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
@@ -381,11 +405,12 @@ f = field(pygame, DisplaySurf,gridDim, settings)
 dim = round((odim-offset)/f.dim)
 insPage = Instructions(pygame, DisplaySurf, settings)
 menu = Menu(pygame, DisplaySurf, settings, [f, insPage, settings], "Main Menu")
+menu.active = True
 while True:
 #Fill background with white each frame
  pygame.draw.rect(DisplaySurf, settings.backgroundColor, (0,0,odim,odim))
 #Draw field
- menu.draw()
+ mainMenu.draw()
 #Push updates to screen
  pygame.display.update()
  #Defining event handlers
@@ -394,4 +419,4 @@ while True:
    pygame.quit()
    sys.exit()
   else:
-   menu.eventHandler(event)
+   mainMenu.eventHandler(event)
