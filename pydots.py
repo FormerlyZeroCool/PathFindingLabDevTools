@@ -283,7 +283,7 @@ class Menu:
     self.screens = screens
     self.buttons = []
     self.title = (FixedWidthButton(settings, self , pg, surf, "Menu:", 25, settings.unitDim , (35+2), int(odim/2)+settings.unitDim , 35))
-    i = 1
+    i = 3
     for screen in self.screens:
       screen.parent = self
       self.buttons.append(FixedWidthButton(settings, screen , pg, surf, screen.menuText, 25, settings.unitDim , (35+2)*i+settings.unitDim , int(odim/2)+settings.unitDim , 35))
