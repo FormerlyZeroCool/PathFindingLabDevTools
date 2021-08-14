@@ -84,15 +84,17 @@ class Settings:
     self.active = False
     self.parent.active = True
     try:
-      self.gridDim = int(self.gridDimTB.data)
-      intoffset = 30
-      if self.gridDim <= 5:
-        intoffset = 0
-      elif self.gridDim > 30:
-        intoffset += 15
-      self.unitDim = round((self.surf.get_size()[0]-offset-intoffset)/self.gridDim)
+      if len(self.gridDimTB.data) != 0:
+        self.gridDim = int(self.gridDimTB.data)
+        intoffset = 30
+        if self.gridDim <= 5:
+          intoffset = 0
+        elif self.gridDim > 30:
+          intoffset += 15
+        self.unitDim = round((self.surf.get_size()[0]-offset-intoffset)/self.gridDim)
     except:
       print("Error not an integer input for grid dimensions!")
+    self.gridDimTB.data = ""
   elif self.leaderButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
     self.leaderOn = not self.leaderOn
   elif self.coordinatesButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
@@ -237,8 +239,10 @@ class TextBox:
     txt_surf = self.font.render(self.data, True, self.color)
     # Resize the box if the text is too long.
     self.width = max(self.width, txt_surf.get_width()+10)
-
-    self.pg.draw.rect(self.surf, self.pg.Color(225,225,225), (int(self.x), int(self.y), int(self.width), int(self.fontSize) + 10))
+   
+    self.pg.draw.rect(self.surf, self.pg.Color(0,0,0), (int(self.x), int(self.y), int(self.width), int(self.fontSize) + 10))
+    self.pg.draw.rect(self.surf, self.pg.Color(225,225,225), (int(self.x)+2, int(self.y)+2, int(self.width)-4, int(self.fontSize) + 10 - 4))
+ 
     # Blit the text.
     self.surf.blit(txt_surf, (self.x+5, self.y+5))
 #Class that handles a set of screens, nested menus can be written too
