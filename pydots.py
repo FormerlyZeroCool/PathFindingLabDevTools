@@ -2,25 +2,7 @@
 
 import sys
 import pygame
-#automatically set later in program
 
-
-#Globals for dimensions rendering uses
-#change odim to change the size of the grid
-odim = 300
-
-
-
-#init objects for pygame
-pygame.init()
-pygame.font.init()
-FPS = pygame.time.Clock()
-#defines frames per second
-FPS.tick(25)
-DisplaySurf = pygame.display.set_mode((odim,odim))
-#these two are for what is saved in the algorithm.txt file
-startTag = "from"
-endTag = "to"
 #you can play with the color settings by chaning the paramas given to each
 #pygame.Color(red, green, blue)
 #settings class for all objects in runtime
@@ -282,11 +264,11 @@ class Menu:
     self.settings = settings
     self.screens = screens
     self.buttons = []
-    self.title = (FixedWidthButton(settings, self , pg, surf, "Menu:", 25, settings.unitDim , (35+2), int(odim/2)+settings.unitDim , 35))
-    i = 3
+    self.title = (FixedWidthButton(settings, self , pg, surf, "Menu:", 25, settings.odim/5 , (35+2), int(settings.odim/2)+settings.unitDim , 35))
+    i = 1
     for screen in self.screens:
       screen.parent = self
-      self.buttons.append(FixedWidthButton(settings, screen , pg, surf, screen.menuText, 25, settings.unitDim , (35+2)*i+settings.unitDim , int(odim/2)+settings.unitDim , 35))
+      self.buttons.append(FixedWidthButton(settings, screen , pg, surf, screen.menuText, 25, settings.odim/5 , (35+2)*i+settings.unitDim , int(settings.odim/4)*3 , 35))
       i += 1
   def eventHandler(self, event):
     if self.active:
@@ -495,7 +477,17 @@ class field:
 
 
 
-
+odim = 300
+#init objects for pygame
+pygame.init()
+pygame.font.init()
+FPS = pygame.time.Clock()
+#defines frames per second
+FPS.tick(25)
+DisplaySurf = pygame.display.set_mode((odim,odim))
+#these two are for what is saved in the algorithm.txt file
+startTag = "from"
+endTag = "to"
 #Don't change instatiation of screens for app
 settings = Settings(pygame, DisplaySurf, 4, 45)
 f = field(pygame, DisplaySurf,4, settings)
