@@ -3,12 +3,12 @@
 import sys
 import pygame
 #automatically set later in program
-dim = -1
+
 
 #Globals for dimensions rendering uses
 #change odim to change the size of the grid
 odim = 300
-gridDim = 4
+gridDim = 5
 offset = 45
 
 #init objects for pygame
@@ -25,13 +25,15 @@ endTag = "to"
 #pygame.Color(red, green, blue)
 #settings class for all objects in runtime
 class Settings:
- def __init__(self, pg, surf):
+ def __init__(self, pg, surf, gridDim, offset):
+  self.unitDim = round((surf.get_size()[0]-offset)/gridDim)
   self.parent = self
   self.menuText = "Settings"
   self.dataFile = "data.txt"
   self.active = False
   self.pg = pg
   self.surf = surf
+  self.gridDim = gridDim
   self.leaderOn = True
   self.showCoordinates = True
   self.showGrid = True
@@ -55,28 +57,42 @@ class Settings:
   i = 1
   deltaY = 20
   fontSize = 15
-  self.leaderButton = Button(self, self , pg, surf, "Show Leader Line", fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim - odim/5), deltaY)
+  self.leaderButton = Button(self, self , pg, surf, "Show Leader Line", fontSize, odim/10, (deltaY+2)*i+self.unitDim /3, int(odim - odim/5), deltaY)
   i += 1
-  self.coordinatesButton = Button(self, self , pg, surf, "Show Current Coordinates", fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim - odim/5), deltaY)
+  self.coordinatesButton = Button(self, self , pg, surf, "Show Current Coordinates", fontSize, odim/10, (deltaY+2)*i+self.unitDim /3, int(odim - odim/5), deltaY)
   i += 1
-  self.showGridButton = Button(self, self , pg, surf, "Show Grid Lines", fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim - odim/5), deltaY)
+  self.showGridButton = Button(self, self , pg, surf, "Show Grid Lines", fontSize, odim/10, (deltaY+2)*i+self.unitDim /3, int(odim - odim/5), deltaY)
   i += 1
-  self.showGridPointsButton = Button(self, self , pg, surf, "Show Grid Points", fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim - odim/5), deltaY)
+  self.showGridPointsButton = Button(self, self , pg, surf, "Show Grid Points", fontSize, odim/10, (deltaY+2)*i+self.unitDim /3, int(odim - odim/5), deltaY)
   i += 1
-  self.showGridLabelsButton = Button(self, self , pg, surf, "Show Grid Labels", fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim - odim/5), deltaY)
+  self.showGridLabelsButton = Button(self, self , pg, surf, "Show Grid Labels", fontSize, odim/10, (deltaY+2)*i+self.unitDim /3, int(odim - odim/5), deltaY)
   i += 1
+  self.gridDimLabel = Button(self, self , pg, surf, "Grid Dim:", fontSize, odim/10, (deltaY+2)*i+self.unitDim /3, int(odim - odim/5), deltaY)
+  self.gridDimTB = TextBox(pg, surf, self, self, fontSize-4,odim/2, (deltaY+2)*i+self.unitDim /3,100)
+  
   self.menuButton = Button(self, self , pg, surf, "Back to Menu", fontSize, odim/10, odim - (deltaY+5), int(odim - odim/5), deltaY)
   for color in self.colors:
-    self.buttons.append(Button(self, self , pg, surf, color[0], fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim/2)+dim, deltaY))
+    self.buttons.append(Button(self, self , pg, surf, color[0], fontSize, odim/10, (deltaY+2)*i+dim/3, int(odim/2)+self.unitDim , deltaY))
     i += 1
 
  def eventHandler(self, event):
+  self.gridDimTB.eventHandler(event)
   if event.type == self.pg.MOUSEBUTTONUP:
    self.mouseClicked(event)
  def mouseClicked(self, event):
   if self.menuButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
     self.active = False
     self.parent.active = True
+    try:
+      self.gridDim = int(self.gridDimTB.data)
+      intoffset = 30
+      if self.gridDim <= 5:
+        intoffset = 0
+      elif self.gridDim > 30:
+        intoffset += 15
+      self.unitDim = round((self.surf.get_size()[0]-offset-intoffset)/self.gridDim)
+    except:
+      print("Error not an integer input for grid dimensions!")
   elif self.leaderButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
     self.leaderOn = not self.leaderOn
   elif self.coordinatesButton.collision(self.pg.mouse.get_pos()[0], self.pg.mouse.get_pos()[1]):
@@ -95,6 +111,8 @@ class Settings:
    self.buttonBackgroundColor = color
 
  def draw(self):
+   self.gridDimLabel.draw()
+   self.gridDimTB.draw()
    self.drawButton(self.leaderButton, self.leaderOn)
    self.drawButton(self.coordinatesButton, self.showCoordinates)
    self.drawButton(self.showGridLabelsButton, self.showGridLabels)
@@ -151,6 +169,7 @@ def loadDataFile(filepath):
      x = end+1
  return arr
 
+
 #record for a line
 class Line:
  def __init__(self,sx,sy,ex,ey):
@@ -179,7 +198,49 @@ class Button:
 
   def collision(self, point0, point1):
     return point0 >= self.x and point0 <= (self.x+self.width) and point1 >= self.y and point1 <= (self.y+self.height)
+#text box class
+class TextBox:
+  def __init__(self, pg, surf, settings, parent,fontSize ,x,y,width):
+    self.parent = parent
+    self.fontSize = fontSize
+    self.x = x
+    self.y = y
+    self.width = width
+    self.active = False
+    self.pg = pg
+    self.surf = surf
+    self.settings = settings
+    self.data = ""
+    self.font = pg.font.SysFont('Calibri', fontSize)
+    self.color_inactive = pg.Color(125,125,125)
+    self.color_active = pg.Color(100,100,150)
+    self.color = self.color_inactive
+  def collision(self, point):
+    txt_surf = self.font.render(self.data, True, self.color)
+    self.width = max(self.width, txt_surf.get_width()+10)
+    return point[0] > self.x and point[0] < self.x+self.width and point[1] > self.y and point[1] < self.y+self.fontSize+5
+  def eventHandler(self,event):
+    if event.type == self.pg.MOUSEBUTTONUP:
+      if self.collision(event.pos):
+        self.active = True
+      else:
+        self.active = False
+      self.color = self.color_inactive
+      if self.active:
+        self.color = self.color_active
+    elif event.type == self.pg.KEYDOWN:
+      if event.key == self.pg.K_BACKSPACE:
+        self.data = self.data[:-1]
+      elif event.key != self.pg.K_RETURN:
+        self.data += event.unicode
+  def draw(self):
+    txt_surf = self.font.render(self.data, True, self.color)
+    # Resize the box if the text is too long.
+    self.width = max(self.width, txt_surf.get_width()+10)
 
+    self.pg.draw.rect(self.surf, self.pg.Color(225,225,225), (int(self.x), int(self.y), int(self.width), int(self.fontSize) + 10))
+    # Blit the text.
+    self.surf.blit(txt_surf, (self.x+5, self.y+5))
 #Class that handles a set of screens, nested menus can be written too
 #ie a Menu than handles other menus
 class Menu:
@@ -192,11 +253,11 @@ class Menu:
     self.settings = settings
     self.screens = screens
     self.buttons = []
-    self.title = (Button(settings, self , pg, surf, "Menu:", 25, dim, (35+2), int(odim/2)+dim, 35))
+    self.title = (Button(settings, self , pg, surf, "Menu:", 25, settings.unitDim , (35+2), int(odim/2)+settings.unitDim , 35))
     i = 1
     for screen in self.screens:
       screen.parent = self
-      self.buttons.append(Button(settings, screen , pg, surf, screen.menuText, 25, dim, (35+2)*i+dim, int(odim/2)+dim, 35))
+      self.buttons.append(Button(settings, screen , pg, surf, screen.menuText, 25, settings.unitDim , (35+2)*i+settings.unitDim , int(odim/2)+settings.unitDim , 35))
       i += 1
   def eventHandler(self, event):
     if self.active:
@@ -283,9 +344,9 @@ class field:
 #setup memory for object
  def __init__(self, pg, surf, dim, settings):
   self.parent = self
-  self.dim = dim
+  settings.gridDim = dim
   self.settings = settings
-  self.menuText = "Exit Menu"
+  self.menuText = "Drawing Grid"
   width = 45
   offset = 80
   i = 0
@@ -331,8 +392,9 @@ class field:
    file.write(contents)
    file.close()
  def calcPointCollision(self, limit):
-  for y in range(self.dim):
-   for x in range(self.dim):
+  dim = self.settings.unitDim
+  for y in range(self.settings.gridDim):
+   for x in range(self.settings.gridDim):
     lastLine = self.cons[len(self.cons)-1]
     if self.pg.mouse.get_pos()[0] > (x*dim+offset-limit) and self.pg.mouse.get_pos()[0] < (x*dim+offset+limit) and self.pg.mouse.get_pos()[1] > y*dim+offset-limit and self.pg.mouse.get_pos()[1] < y*dim+offset+limit:
      if (lastLine.ex !=x or lastLine.ey != y):
@@ -361,6 +423,7 @@ class field:
   if(self.active):
     self.__draw()
  def __draw(self):
+  dim = self.settings.unitDim
   color = self.settings.buttonBackgroundColor
   self.settings.buttonBackgroundColor = pygame.Color(55, 125, 55)
   self.menuButton.draw()
@@ -370,23 +433,24 @@ class field:
   self.settings.buttonBackgroundColor = color
   #Draw grid, and labels
   if self.settings.showGridLabels:
-   for x in range(self.dim):
+   for x in range(self.settings.gridDim):
     self.surf.blit(self.font.render(str(x), False, (0, 0, 0)), (x*dim+offset-10, 0))
     self.surf.blit(self.font.render(str(x), False, (0, 0, 0)), (10, x*dim+offset-10))
   if self.settings.showGrid:
-   for x in range(self.dim):
-    self.pg.draw.line(self.surf, self.settings.gridColor,(offset+dim*x,offset), (offset+dim*x, (self.dim-1)*dim+offset))
-    self.pg.draw.line(self.surf, self.settings.gridColor,(offset,dim*x+offset),((self.dim-1)*dim+offset,offset+dim*x)) 
+   for x in range(self.settings.gridDim):
+    self.pg.draw.line(self.surf, self.settings.gridColor,(offset+dim*x,offset), (offset+dim*x, (self.settings.gridDim-1)*dim+offset))
+    self.pg.draw.line(self.surf, self.settings.gridColor,(offset,dim*x+offset),((self.settings.gridDim-1)*dim+offset,offset+dim*x)) 
+  
   #Draw dots
   if self.settings.showGridPoints:
-   for y in range(self.dim):
-    for x in range(self.dim):
+   for y in range(self.settings.gridDim):
+    for x in range(self.settings.gridDim):
      self.pg.draw.circle(self.surf, self.settings.dotColor, (int(dim*x+offset), int(dim*y+offset)), 10)
   #Draw lines placed
   for line in self.cons[1:]:
    self.pg.draw.line(self.surf, self.settings.laidLinesColor, (line.sx*dim+offset, line.sy*dim+offset), (line.ex*dim+offset,line.ey*dim+offset), 5)
-  line = self.cons[len(self.cons)-1]
   #Draw line to cursor
+  line = self.cons[len(self.cons)-1]
   if self.settings.leaderOn:
    self.pg.draw.line(self.surf, self.settings.leaderLineColor, (line.ex*dim+offset, line.ey*dim+offset), self.pg.mouse.get_pos(), 4)
   #calulate string for cursor pos
@@ -399,18 +463,22 @@ class field:
    else:
     self.surf.blit(textsurface, (self.pg.mouse.get_pos()[0]-dim, self.pg.mouse.get_pos()[1]-35))
 
+
+
+
+
 #Don't change instatiation of screens for app
-settings = Settings(pygame, DisplaySurf)
+settings = Settings(pygame, DisplaySurf, gridDim, offset)
 f = field(pygame, DisplaySurf,gridDim, settings)
-dim = round((odim-offset)/f.dim)
+
 insPage = Instructions(pygame, DisplaySurf, settings)
 menu = Menu(pygame, DisplaySurf, settings, [f, insPage, settings], "Main Menu")
-menu.active = True
+#f.active = True
 while True:
 #Fill background with white each frame
  pygame.draw.rect(DisplaySurf, settings.backgroundColor, (0,0,odim,odim))
 #Draw field
- mainMenu.draw()
+ menu.draw()
 #Push updates to screen
  pygame.display.update()
  #Defining event handlers
@@ -419,4 +487,4 @@ while True:
    pygame.quit()
    sys.exit()
   else:
-   mainMenu.eventHandler(event)
+   menu.eventHandler(event)
