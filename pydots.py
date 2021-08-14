@@ -3,6 +3,9 @@
 import sys
 import pygame
 
+#these two are for what is saved in the algorithm.txt file
+startTag = "from"
+endTag = "to"
 #you can play with the color settings by chaning the paramas given to each
 #pygame.Color(red, green, blue)
 #settings class for all objects in runtime
@@ -485,9 +488,6 @@ FPS = pygame.time.Clock()
 #defines frames per second
 FPS.tick(25)
 DisplaySurf = pygame.display.set_mode((odim,odim))
-#these two are for what is saved in the algorithm.txt file
-startTag = "from"
-endTag = "to"
 #Don't change instatiation of screens for app
 settings = Settings(pygame, DisplaySurf, 4, 45)
 f = field(pygame, DisplaySurf,4, settings)
