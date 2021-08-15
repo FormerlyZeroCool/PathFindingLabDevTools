@@ -55,7 +55,7 @@ class Settings:
   self.showGridLabelsButton = Button(self, self , pg, surf, "Show Grid Labels", fontSize, odim/10, i)
   i += self.showGridLabelsButton.height + 5
   self.gridDimLabel = Button(self, self , pg, surf, "Grid Dim:", fontSize, odim/10, i)
-  self.gridDimTB = TextBox(pg, surf, self, self, fontSize-4,odim/2, i,100)
+  self.gridDimTB = TextBox(pg, surf, self, self, fontSize-4, self.gridDimLabel.x + self.gridDimLabel.width + 10, i,100)
   
   self.menuButton = Button(self, self , pg, surf, "Back to Menu", fontSize, odim/10, odim - (deltaY+5))
   for color in self.colors:
@@ -225,7 +225,7 @@ class TextBox:
     self.data = ""
     self.font = pg.font.SysFont('Calibri', fontSize)
     self.color_inactive = pg.Color(125,125,125)
-    self.color_active = pg.Color(100,100,150)
+    self.color_active = pg.Color(0,0,0)
     self.color = self.color_inactive
   def collision(self, point):
     txt_surf = self.font.render(self.data, True, self.color)
@@ -240,7 +240,7 @@ class TextBox:
       self.color = self.color_inactive
       if self.active:
         self.color = self.color_active
-    elif event.type == self.pg.KEYDOWN:
+    elif self.active and event.type == self.pg.KEYDOWN:
       if event.key == self.pg.K_BACKSPACE:
         self.data = self.data[:-1]
       elif event.key != self.pg.K_RETURN:
@@ -250,7 +250,7 @@ class TextBox:
     # Resize the box if the text is too long.
     self.width = max(self.width, txt_surf.get_width()+10)
    
-    self.pg.draw.rect(self.surf, self.pg.Color(0,0,0), (int(self.x), int(self.y), int(self.width), int(self.fontSize) + 10))
+    self.pg.draw.rect(self.surf, self.color, (int(self.x), int(self.y), int(self.width), int(self.fontSize) + 10))
     self.pg.draw.rect(self.surf, self.pg.Color(225,225,225), (int(self.x)+2, int(self.y)+2, int(self.width)-4, int(self.fontSize) + 10 - 4))
  
     # Blit the text.
@@ -462,7 +462,7 @@ class field:
   if self.settings.showGridPoints:
    for y in range(self.settings.gridDim):
     for x in range(self.settings.gridDim):
-     self.pg.draw.circle(self.surf, self.settings.dotColor, (int(dim*x+self.settings.offset), int(dim*y+self.settings.offset)), 10)
+     self.pg.draw.circle(self.surf, self.settings.dotColor, (int(dim*x+self.settings.offset), int(dim*y+self.settings.offset)), self.settings.unitDim/4)
   #Draw lines placed
   for line in self.cons[1:]:
    self.pg.draw.line(self.surf, self.settings.laidLinesColor, (line.sx*dim+self.settings.offset, line.sy*dim+self.settings.offset), (line.ex*dim+self.settings.offset,line.ey*dim+self.settings.offset), 5)
@@ -483,7 +483,7 @@ class field:
 
 
 
-odim = 650
+odim = 300
 #init objects for pygame
 pygame.init()
 pygame.font.init()
@@ -501,7 +501,9 @@ menu = Menu(pygame, DisplaySurf, settings, [f, insPage, settings], "Main Menu")
 while True:
 #Fill background with white each frame
  pygame.draw.rect(DisplaySurf, settings.backgroundColor, (0,0,odim,odim))
-#Draw field
+#Draws anything by searching recursively through a tree of menus, 
+#and screens for an active screen/menu
+#if none is active this will be set to active
  menu.draw()
 #Push updates to screen
  pygame.display.update()
